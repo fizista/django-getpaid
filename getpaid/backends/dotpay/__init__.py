@@ -152,7 +152,7 @@ class PaymentProcessor(PaymentProcessorBase):
         if PaymentProcessor.get_backend_setting('method', 'get').lower() == 'post':
             return self._GATEWAY_URL , 'POST', params
         elif PaymentProcessor.get_backend_setting('method', 'get').lower() == 'get':
-            for key in params.keys():
+            for key in params:
                 params[key] = unicode(params[key]).encode('utf-8')
             return self._GATEWAY_URL + '?' + urllib.urlencode(params), "GET", {}
         else:

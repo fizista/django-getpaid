@@ -136,7 +136,7 @@ class PaymentProcessor(PaymentProcessorBase):
         if PaymentProcessor.get_backend_setting('method', 'get').lower() == 'post':
             return self._GATEWAY_URL + 'UTF/NewPayment', 'POST', params
         elif PaymentProcessor.get_backend_setting('method', 'get').lower() == 'get':
-            for key in params.keys():
+            for key in params:
                 params[key] = unicode(params[key]).encode('utf-8')
             return self._GATEWAY_URL + 'UTF/NewPayment?' + urllib.urlencode(params), 'GET', {}
         else:
@@ -149,7 +149,7 @@ class PaymentProcessor(PaymentProcessorBase):
 
         params['sig'] = PaymentProcessor.compute_sig(params, self._GET_SIG_FIELDS, key1)
 
-        for key in params.keys():
+        for key in params:
             params[key] = unicode(params[key]).encode('utf-8')
 
         data = urllib.urlencode(params)
@@ -164,7 +164,10 @@ class PaymentProcessor(PaymentProcessorBase):
             if tag.nodeType == Node.ELEMENT_NODE:
                 response_params[tag.nodeName] = reduce(lambda x,y: x + y.nodeValue, tag.childNodes, u"")
         if PaymentProcessor.compute_sig(response_params, self._GET_RESPONSE_SIG_FIELDS, key2) == response_params['sig']:
-            if not (int(response_params['pos_id']) == params['pos_id'] or int(response_params['order_id']) == self.payment.pk):
+            if (
+                int(response_params['pos_id']) != params['pos_id']
+                and int(response_params['order_id']) != self.payment.pk
+            ):
                 logger.error('Wrong pos_id and/or payment for Payment/get response data %s' % str(response_params))
                 return
 
